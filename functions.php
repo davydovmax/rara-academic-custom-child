@@ -19,4 +19,24 @@ if ( !function_exists( 'child_theme_configurator_css' ) ):
 endif;
 add_action( 'wp_enqueue_scripts', 'child_theme_configurator_css' );
 
+if ( !function_exists( 'hide_post_the_posted_on_text' ) ):
+    function hide_post_the_posted_on_text() {
+        $categories_without_posted_on_text = array(
+            'classes',
+            'teachers'
+        ); // Array of categories where we don't show posted-on-by text.
+
+        $categories = get_the_category();
+
+        foreach ( $categories as $index => $single_cat ) {
+
+            if ( in_array( $single_cat->slug, $categories_without_posted_on_text ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+endif;
+
 // END ENQUEUE PARENT ACTION
