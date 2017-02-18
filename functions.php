@@ -19,18 +19,40 @@ if ( !function_exists( 'child_theme_configurator_css' ) ):
 endif;
 add_action( 'wp_enqueue_scripts', 'child_theme_configurator_css' );
 
-if ( !function_exists( 'hide_post_the_posted_on_text' ) ):
-    function hide_post_the_posted_on_text() {
-        $categories_without_posted_on_text = array(
-            'classes',
-            'teachers'
-        ); // Array of categories where we don't show posted-on-by text.
+// END ENQUEUE PARENT ACTION
+
+if ( ! function_exists('write_log')) {
+   function write_log ( $log )  {
+      if ( is_array( $log ) || is_object( $log ) ) {
+         error_log( print_r( $log, true ) );
+      } else {
+         error_log( $log );
+      }
+   }
+}
+
+if ( !function_exists( 'post_should_behave_like_page' ) ):
+    function post_should_behave_like_page() {
+        // $categories_without_posted_on_text = array(
+        //     'classes',
+        //     'teachers'
+        // ); // Array of categories where we don't show posted-on-by text.
 
         $categories = get_the_category();
 
+        $page_like_categories = get_theme_mod( 'art_people_page_like_categories' );
+
+        write_log($page_like_categories);
+
+        if(!$page_like_categories) {
+            return false;
+        }
+
         foreach ( $categories as $index => $single_cat ) {
 
-            if ( in_array( $single_cat->slug, $categories_without_posted_on_text ) ) {
+            write_log($single_cat->term_id);
+
+            if ( in_array( $single_cat->term_id, $page_like_categories ) ) {
                 return true;
             }
         }
@@ -54,7 +76,7 @@ if ( !function_exists( 'art_people_customize_register' ) ):
             )
         );
 
-        $wp_customize->add_setting( 'art_people_post_like_pages' );
+        $wp_customize->add_setting( 'art_people_page_like_categories' );
 
         $args = array(
            'type'                     => 'post',
@@ -76,7 +98,7 @@ if ( !function_exists( 'art_people_customize_register' ) ):
                 $wp_customize,
                 'multiple_select_setting',
                 array(
-                    'settings' => 'art_people_post_like_pages',
+                    'settings' => 'art_people_page_like_categories',
                     'label'    => 'Page-like categories',
                     'section'  => 'rara_academic_art_people_settings',
                     'type'     => 'multiple-select',
@@ -88,4 +110,7 @@ if ( !function_exists( 'art_people_customize_register' ) ):
 endif;
 add_action( 'customize_register', 'art_people_customize_register' );
 
-// END ENQUEUE PARENT ACTION
+if ( ! function_exists('rara_academic_entry_footer')) {
+    function rara_academic_entry_footer() {
+    }
+}

@@ -14,7 +14,7 @@
 	<header class="entry-header">
 		<?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
 
-		<?php if ( 'post' === get_post_type() and !hide_post_the_posted_on_text() ) : ?>
+		<?php if ( 'post' === get_post_type() && !post_should_behave_like_page() ) : ?>
 				<div class="entry-meta">
 					<?php rara_academic_posted_on(); ?>
 				</div><!-- .entry-meta -->
