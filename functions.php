@@ -39,41 +39,11 @@ if ( !function_exists( 'hide_post_the_posted_on_text' ) ):
     }
 endif;
 
-/**
- * Multiple select customize control class.
- */
-class Customize_Control_Multiple_Select extends WP_Customize_Control {
-
-    /**
-     * The type of customize control being rendered.
-     */
-    public $type = 'multiple-select';
-
-    /**
-     * Displays the multiple select on the customize screen.
-     */
-    public function render_content() {
-
-    if ( empty( $this->choices ) )
-        return;
-    ?>
-        <label>
-            <span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
-            <select <?php $this->link(); ?> multiple="multiple" style="height: 100%;">
-                <?php
-                    foreach ( $this->choices as $value => $label ) {
-                        $selected = ( in_array( $value, $this->value() ) ) ? selected( 1, 1, false ) : '';
-                        echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . $label . '</option>';
-                    }
-                ?>
-            </select>
-        </label>
-    <?php }
-}
-
 if ( !function_exists( 'art_people_customize_register' ) ):
     function art_people_customize_register( $wp_customize )
     {
+        require get_stylesheet_directory() . '/inc/multi-select.php';
+
         $wp_customize->add_section(
             'rara_academic_art_people_settings',
             array(
@@ -86,6 +56,21 @@ if ( !function_exists( 'art_people_customize_register' ) ):
 
         $wp_customize->add_setting( 'art_people_post_like_pages' );
 
+        $args = array(
+           'type'                     => 'post',
+           'orderby'                  => 'name',
+           'order'                    => 'ASC',
+           'hide_empty'               => 1,
+           'hierarchical'             => 1,
+           'taxonomy'                 => 'category'
+        );
+        $option_categories = array();
+        $category_lists = get_categories( $args );
+
+        foreach( $category_lists as $category ){
+            $option_categories[$category->term_id] = $category->name;
+        }
+
         $wp_customize->add_control(
             new Customize_Control_Multiple_Select(
                 $wp_customize,
@@ -95,11 +80,7 @@ if ( !function_exists( 'art_people_customize_register' ) ):
                     'label'    => 'Page-like categories',
                     'section'  => 'rara_academic_art_people_settings',
                     'type'     => 'multiple-select',
-                    'choices'  => array(
-                        'google' => 'Google',
-                        'bing' => 'Bing',
-                        'duck' => 'DuckDuckGo'
-                    )
+                    'choices'  => $option_categories,
                 )
             )
         );
