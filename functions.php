@@ -42,8 +42,6 @@ if ( !function_exists( 'post_should_behave_like_page' ) ):
 
         $page_like_categories = get_theme_mod( 'art_people_page_like_categories' );
 
-        write_log($page_like_categories);
-
         if(!$page_like_categories) {
             return false;
         }
