@@ -124,3 +124,94 @@ function art_people_activate_bundled_widgets(){
     }
 }
 add_filter('admin_init', 'art_people_activate_bundled_widgets');
+
+add_action( 'init', 'my_add_excerpts_to_pages' );
+function my_add_excerpts_to_pages() {
+     add_post_type_support( 'page', 'excerpt' );
+}
+
+function ap_get_sh_post_types() {
+    $sh_post_types = get_post_types( '', 'names' );
+    unset( $sh_post_types['attachment'], $sh_post_types['revision'], $sh_post_types['nav_menu_item'] );
+    return $sh_post_types;
+}
+/*
+Based on plugin 'Hide Featured Image' (http://shahpranav.com/2015/05/hide-featured-image-on-single-post/)
+By shahpranaf http://shahpranav.com/
+*/
+function sh_post_types_custom_box() {
+    $sh_post_types = ap_get_sh_post_types();
+
+    foreach ($sh_post_types as $post_type) {
+        add_meta_box( 'ap_hide_featured_single', __( 'Hide Featured Image?', 'HideImage' ), 'sh_featured_box', $post_type, 'side', 'default' );
+    }
+}
+/*
+Based on plugin 'Hide Featured Image' (http://shahpranav.com/2015/05/hide-featured-image-on-single-post/)
+By shahpranaf http://shahpranav.com/
+*/
+function sh_featured_box($post){
+    wp_nonce_field( plugin_basename( __FILE__ ), $post->post_type . '_noncename' );
+    $hide_featured = get_post_meta( $post->ID, '_ap_hide_featured_single', true ) ? 1 : 0; ?>
+    <input type="radio" name="_ap_hide_featured_single" value="1" <?php checked( $hide_featured, 1 ); ?>><?php _e( 'Yes', 'HideImage' ); ?>&nbsp;&nbsp;
+    <input type="radio" name="_ap_hide_featured_single" value="0" <?php checked( $hide_featured, 0 ); ?>><?php _e( 'No', 'HideImage' ); ?><?php
+}
+add_action( 'add_meta_boxes', 'sh_post_types_custom_box' ); // WP 3.0+
+
+/*
+Based on plugin 'Hide Featured Image' (http://shahpranav.com/2015/05/hide-featured-image-on-single-post/)
+By shahpranaf http://shahpranav.com/
+*/
+function sh_post_types_save_postdata( $post_id ) {
+    $sh_post_types = ap_get_sh_post_types();
+
+    // verify if this is an auto save routine.
+    // If it is our form has not been submitted, so we don't want to do anything
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+      return;
+
+    // verify this came from the our screen and with proper authorization,
+    // because save_post can be triggered at other times
+    if ( !wp_verify_nonce( @$_POST[$_POST['post_type'] . '_noncename'], plugin_basename( __FILE__ ) ) )
+      return;
+
+    // user can edit
+    if ( !current_user_can( 'edit_page', $post_id ) ) {
+      return;
+    }
+
+    // OK,nonce has been verified and now we can save the data
+    if( in_array($_POST['post_type'], $sh_post_types) ) {
+      $hide_featured = (
+        isset( $_POST['_ap_hide_featured_single'] )
+        && $_POST['_ap_hide_featured_single'] == 1 )
+      ? '1'
+      : $_POST['_ap_hide_featured_single'];
+      update_post_meta( $post_id, '_ap_hide_featured_single', $hide_featured );
+    }
+}
+add_action( 'save_post', 'sh_post_types_save_postdata' ); /* Do something with the data entered */
+
+function set_feature_image_visibility( $post ) {
+    // abort if it's not a single post
+    if( get_queried_object_id() != $post->ID ) {
+        return;
+    }
+
+    if ( !(is_single( $post->ID ) || is_page( $post->ID ) ) ) {
+        return;
+    }
+
+    $hide = get_post_meta( get_the_ID(), '_ap_hide_featured_single', true );/* Hide single post */;
+
+    // hide the featured image if it was set so
+    if ( $hide ) {
+        add_filter( 'get_post_metadata', 'ap_hide_featured_image_filter', 10, 4 );
+    }
+}
+function ap_hide_featured_image_filter( $value, $post_id, $meta_key, $single ) {
+    if ( $single && '_thumbnail_id' == $meta_key && $post_id == get_queried_object_id() ) {
+        return false;
+    }
+}
+add_action( 'the_post', 'set_feature_image_visibility' );
