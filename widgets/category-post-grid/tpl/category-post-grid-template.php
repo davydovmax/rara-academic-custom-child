@@ -1,6 +1,8 @@
 <?php
     $target_category = $instance['target_category'];
     $number_of_rows = $instance['number_of_rows'];
+    $section_title = $instance['section_title'];
+    $section_content = $instance['section_content'];
 
     $posts = new WP_Query( array(
         'posts_per_page'      => -1,
@@ -15,12 +17,15 @@
 <section class="popular-courses">
     <div class="container">
 
-<?php while( $number_of_rows > 0 && $posts->have_posts() )
-{
-    $posts->the_post();
-    $emmit_row_start = ($counter % 3) == 0;
-    $emmit_row_end = ($counter % 3) == 2;
-    ++$counter;
+<?php
+    if( $section_title ) echo '<h2 class="section-title">' . esc_html( $section_title ) . '</h2>';
+    if( $section_content ) echo wpautop( wp_kses_post( $section_content ) );
+
+    while( $number_of_rows > 0 && $posts->have_posts() ) {
+        $posts->the_post();
+        $emmit_row_start = ($counter % 3) == 0;
+        $emmit_row_end = ($counter % 3) == 2;
+        ++$counter;
 ?>
 
 <?php if ( $emmit_row_start ) { ?>

@@ -62,6 +62,16 @@ class Category_Post_Grid_Widget extends SiteOrigin_Widget {
                     'default' => '',
                     'options' => $option_categories,
                 ),
+                'section_title' => array(
+                    'type' => 'text',
+                    'label' => __( 'Section Title Text', 'widget-form-fields-text-domain' ),
+                    'default' => '',
+                ),
+                'section_content' => array(
+                    'type' => 'text',
+                    'label' => __( 'Section Description', 'widget-form-fields-text-domain' ),
+                    'default' => '',
+                ),
                 'number_of_rows' => array(
                     'type' => 'slider',
                     'label' => __( 'Number of rows', 'widget-form-fields-text-domain' ),
