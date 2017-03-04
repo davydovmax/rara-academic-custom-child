@@ -33,11 +33,6 @@ if ( ! function_exists('write_log')) {
 
 if ( !function_exists( 'post_should_behave_like_page' ) ):
     function post_should_behave_like_page() {
-        // $categories_without_posted_on_text = array(
-        //     'classes',
-        //     'teachers'
-        // ); // Array of categories where we don't show posted-on-by text.
-
         $categories = get_the_category();
 
         $page_like_categories = get_theme_mod( 'art_people_page_like_categories' );
@@ -47,9 +42,6 @@ if ( !function_exists( 'post_should_behave_like_page' ) ):
         }
 
         foreach ( $categories as $index => $single_cat ) {
-
-            write_log($single_cat->term_id);
-
             if ( in_array( $single_cat->term_id, $page_like_categories ) ) {
                 return true;
             }
@@ -97,7 +89,7 @@ if ( !function_exists( 'art_people_customize_register' ) ):
                 'multiple_select_setting',
                 array(
                     'settings' => 'art_people_page_like_categories',
-                    'label'    => 'Page-like categories',
+                    'label' => __( 'Page-like categories', 'todo_fix_translation_domain' ),
                     'section'  => 'rara_academic_art_people_settings',
                     'type'     => 'multiple-select',
                     'choices'  => $option_categories,
@@ -112,3 +104,23 @@ if ( ! function_exists('rara_academic_entry_footer')) {
     function rara_academic_entry_footer() {
     }
 }
+
+function rara_academic_child_theme_folder() {
+    return get_stylesheet_directory();
+}
+
+function add_art_people_widgets($folders){
+    $folders[] = get_stylesheet_directory() . 'widgets';
+    return $folders;
+}
+add_filter('siteorigin_widgets_widget_folders', 'add_art_people_widgets');
+
+require get_stylesheet_directory() . '/widgets/category-post-grid/category-post-grid.php';
+
+function art_people_activate_bundled_widgets(){
+    if( !get_theme_mod('bundled_widgets_activated') ) {
+        SiteOrigin_Widgets_Bundle::single()->activate_widget( 'category-post-grid' );
+        set_theme_mod( 'bundled_widgets_activated', true );
+    }
+}
+add_filter('admin_init', 'art_people_activate_bundled_widgets');
