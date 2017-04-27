@@ -215,3 +215,17 @@ function ap_hide_featured_image_filter( $value, $post_id, $meta_key, $single ) {
     }
 }
 add_action( 'the_post', 'set_feature_image_visibility' );
+
+function art_people_exclude_page_like_category( $query ) {
+    if ( $query->is_home() && $query->is_main_query() ) {
+
+        $page_like_categories = get_theme_mod( 'art_people_page_like_categories' );
+
+        if( !$page_like_categories ) {
+            return false;
+        }
+
+        $query->set( 'category__not_in', $page_like_categories );
+    }
+}
+add_action( 'pre_get_posts', 'art_people_exclude_page_like_category' );
